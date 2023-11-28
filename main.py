@@ -7,12 +7,12 @@ logging = logging.getLogger(__name__)
 
 
 def main():
-    manager = AssistantManager(api_key=config.openai_api_key, assistant_id=config.openai_assistant_id)
+    assistant = AssistantManager(api_key=config.openai_api_key, assistant_id=config.openai_assistant_id)
 
-    # thread = manager.create_thread()
+    # thread = assistant.create_thread()
     # print(thread)
 
-    messages = manager.get_assistant_response(
+    messages = assistant.get_assistant_response(
         thread_id="thread_ckt30hTLdRycKOc1NIj1KJZb",
         instructions="You are a personal math tutor. When asked a math question, write and run code to answer the "
                      "question.",
