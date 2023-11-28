@@ -12,7 +12,7 @@ def main():
     # thread = assistant.create_thread()
     # print(thread)
 
-    messages = assistant.get_assistant_response(
+    response = assistant.get_assistant_response(
         thread_id="thread_ckt30hTLdRycKOc1NIj1KJZb",
         instructions="You are a personal math tutor. When asked a math question, write and run code to answer the "
                      "question.",
@@ -22,9 +22,9 @@ def main():
         user_message="what is value of x?"
     )
 
-    for msg in messages.data:
-        role = msg.role
-        content = msg.content[0].text.value
+    for message in response.data:
+        role = message.role
+        content = message.content[0].text.value
         print(f"{role.capitalize()}: {content}")
 
 

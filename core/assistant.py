@@ -115,7 +115,7 @@ class AssistantManager:
                 run_status = self.client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
                 current_time = time.time()
 
-                logger.info(f"Run status: {run_status.status}")
+                logger.debug(f"Run status: {run_status.status}")
 
                 if run_status.status == 'completed':
                     return self._retrieve_thread_messages(thread_id)
@@ -124,7 +124,7 @@ class AssistantManager:
                     logger.warning(error_msg)
                     raise TimeoutError(error_msg)
                 elif run_status.status not in ["queued", "in_progress"]:
-                    logger.info(f"Run {run_id} ended with status: {run_status.status}")
+                    logger.warning(f"Run {run_id} ended with status: {run_status.status}")
                     break
 
                 time.sleep(check_interval)
