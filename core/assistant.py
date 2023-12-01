@@ -1,13 +1,15 @@
 import time
+import json
 import logging
+from typing import Optional, Callable, List, Dict, Generator
 from openai import OpenAI, OpenAIError
+from core.parser import FunctionDefinitionParser
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class AssistantManager:
-    def __init__(self, api_key, assistant_id, model="gpt-4-1106-preview"):
+    def __init__(self, api_key, assistant_id, model="gpt-4-1106-preview", functions: Optional[List[Callable]] = None):
         """
         Initialize the AssistantManager with the necessary OpenAI parameters.
 
@@ -25,7 +27,31 @@ class AssistantManager:
         self.client = OpenAI(api_key=api_key)
         self.assistant_id = assistant_id
         self.model = model
-        self.tools = [{"type": "code_interpreter"}, {"type": "retrieval"}]
+        self.function_parser = FunctionDefinitionParser()  # Initialize the parser first
+        self.functions = self._parse_functions(functions)  # Then use it in _parse_functions
+        self.func_mapping = self._create_func_mapping(functions)
+
+        # Unpacking the generator here
+        self.tools = [
+            {"type": "code_interpreter"},
+            {"type": "retrieval"},
+            *self.functions  # Unpack the generator
+        ]
+
+    def _parse_functions(self, functions: Optional[List[Callable]]) -> Generator[Dict, None, None]:
+        """Yields each 'python function' as a JSON-serializable dict."""
+        if functions is not None:
+            for func in functions:
+                yield self.function_parser.convert_function_to_json_schema(func)
+
+    def _create_func_mapping(self, functions: Optional[List[Callable]]) -> Dict[str, Callable]:
+        """Creates a mapping between the function names and function definitions."""
+        if functions is None:
+            return {}
+        return {func.__name__: func for func in functions}
+
+    def debug_tools(self):
+        print(self.tools)
 
     def create_thread(self):
         """
@@ -88,11 +114,29 @@ class AssistantManager:
                 thread_id=thread_id,
                 assistant_id=self.assistant_id,
                 model=self.model,
-                instructions=instructions
+                instructions=instructions,
+                tools=self.tools
             )
             return run
         except OpenAIError as e:
             logger.error(f"Failed to run assistant on thread {thread_id}: {e}")
+            raise
+
+    def cancel_run(self, run_id, thread_id):
+        """
+        Cancel a run.
+
+        Args:
+            run_id (str): The ID of the run.
+            thread_id (str): The ID of the thread.
+
+        Raises:
+            OpenAIError: If the API call fails.
+        """
+        try:
+            self.client.beta.threads.runs.cancel(thread_id=thread_id, run_id=run_id)
+        except OpenAIError as e:
+            logger.error(f"Failed to cancel run {run_id} on thread {thread_id}: {e}")
             raise
 
     def _wait_for_run_completion(self, run_id, thread_id, check_interval=5, max_wait_time=None):
@@ -119,6 +163,19 @@ class AssistantManager:
 
                 if run_status.status == 'completed':
                     return self._retrieve_thread_messages(thread_id)
+                elif run_status.status == 'requires_action':
+                    logger.debug("Processing required tool calls.")
+                    required_actions = run_status.required_action.submit_tool_outputs.model_dump()
+                    logger.debug(f"Required actions: {required_actions}")
+                    tool_outputs = self._handle_tool_call(required_actions)
+                    logger.debug(f"Tool outputs: {tool_outputs}")
+
+                    # Submitting tool outputs back to the assistant
+                    self.client.beta.threads.runs.submit_tool_outputs(
+                        thread_id=thread_id,
+                        run_id=run_id,
+                        tool_outputs=tool_outputs
+                    )
                 elif max_wait_time and (current_time - start_time) > max_wait_time:
                     error_msg = f"Maximum wait time exceeded for run {run_id}"
                     logger.warning(error_msg)
@@ -131,6 +188,59 @@ class AssistantManager:
             except OpenAIError as e:
                 logger.error(f"Error while waiting for run completion: {e}")
                 raise
+
+    def _handle_tool_call(self, required_actions):
+        """
+        Handles tool calls made by the OpenAI Assistant.
+
+        Args:
+            required_actions: Actions required as indicated by the OpenAI Assistant.
+
+        Returns:
+            List of tool outputs to submit back to the Assistant.
+        """
+        tool_outputs = []
+        for action in required_actions["tool_calls"]:
+            func_name = action['function']['name']
+            arguments = json.loads(action['function']['arguments'])
+
+            if func_name in self.func_mapping:
+                output = self._call_function(func_name, arguments)
+                # Convert output to JSON string if it's a dictionary
+                if isinstance(output, dict):
+                    output = json.dumps(output)
+                tool_outputs.append({
+                    "tool_call_id": action['id'],
+                    "output": output
+                })
+            else:
+                raise ValueError(f"Unknown function: {func_name}")
+
+        return tool_outputs
+
+    def _call_function(self, func_name: str, args: Dict):
+        """
+        Calls the actual function when invoked in _handle_tool_call.
+
+        Args:
+            func_name: The name of the function to call.
+            args: Arguments for the function.
+
+        Returns:
+            The result of the function call.
+        """
+        try:
+            logger.debug(f"Calling function '{func_name}' with arguments: {args}")
+            func = self.func_mapping.get(func_name)
+            if func:
+                result = func(**args)
+                logger.debug(f"Function '{func_name}' returned: {result}")
+                return result
+            else:
+                raise ValueError(f"Function {func_name} not implemented")
+        except Exception as e:
+            logger.error(f"Error in calling function {func_name} with arguments: {args}, error: {e}", exc_info=True)
+            raise
 
     def _retrieve_thread_messages(self, thread_id):
         """
