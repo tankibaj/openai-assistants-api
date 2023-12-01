@@ -139,7 +139,7 @@ class AssistantManager:
             logger.error(f"Failed to cancel run {run_id} on thread {thread_id}: {e}")
             raise
 
-    def _wait_for_run_completion(self, run_id, thread_id, check_interval=5, max_wait_time=None):
+    def _wait_for_run_completion(self, run_id, thread_id, check_interval=3, max_wait_time=10):
         """
         Wait for a run to complete, checking its status periodically.
 
