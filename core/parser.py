@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class FunctionDefinitionParser:
     """
     Class responsible for parsing Python function definitions and converting them into
-    a JSON-like structure for use in applications like FunctionsAgent.
+    a JSON-like structure for OpenAI Function calling definition.
     """
 
     @staticmethod
@@ -54,7 +54,7 @@ class FunctionDefinitionParser:
 
     def convert_function_to_json_schema(self, func: Callable) -> Dict[str, Any]:
         """
-        Converts a Python function definition to a JSON-like structure for easier handling and processing.
+        Converts a Python function definition to a JSON-like structure for OpenAI Function calling definition.
 
         :param func: The Python function to parse.
         :return: A dictionary representing the function in a JSON-like format.
