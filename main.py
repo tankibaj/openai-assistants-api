@@ -26,14 +26,14 @@ def display_thread_messages(messages):
 
 def main():
     response = assistant.get_assistant_response(
-        thread_id="thread_ckt30hTLdRycKOc1NIj1KJZb",
+        thread_id="thread_BbFoFrOGpw7hpFCjoE6zlJNh",
         instructions="You are a personal math tutor. When asked a math question, write and run code to answer the "
                      "question.",
         # file_ids=["file_ckt30hTJn1q2f2j1Nz8Z6y1Y"],
         # user_message="I need to solve the equation `3x + 11 = 14`. Can you help me?"
         # user_message="remember x = 56"
         # user_message="what is value of x?"
-        user_message="Is Sam Altman fired from OpenAI?"
+        user_message="What is 20% of 700000?"
     )
     # -- Print messages
     display_thread_messages(response)
@@ -42,6 +42,10 @@ def main():
 if __name__ == '__main__':
     # -- Create thread
     # thread = assistant.create_thread()
+    # print(thread)
+
+    # -- Delete thread
+    # thread = assistant.delete_thread(thread_id="thread_ckt30hTLdRycKOc1NIj1KJZb")
     # print(thread)
 
     # -- Retrieve thread messages

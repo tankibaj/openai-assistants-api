@@ -70,6 +70,22 @@ class AssistantManager:
             logger.error(f"Failed to create thread: {e}")
             raise
 
+    def delete_thread(self, thread_id):
+        """
+        Delete a conversation thread.
+
+        Args:
+            thread_id (str): The ID of the thread to delete.
+
+        Raises:
+            OpenAIError: If the API call fails.
+        """
+        try:
+            self.client.beta.threads.delete(thread_id)
+        except OpenAIError as e:
+            logger.error(f"Failed to delete thread {thread_id}: {e}")
+            raise
+
     def _add_message_to_thread(self, thread_id, role, content, file_ids=None):
         """
         Add a message to a specified thread.
