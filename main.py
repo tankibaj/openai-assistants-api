@@ -19,7 +19,6 @@ The functions enables you to fetch information about weather, kubernetes_changel
 All your responses should be in a human-readable format.
 """
 
-
 assistant = AssistantManager(
     api_key=config.openai_api_key,
     assistant_id=config.openai_assistant_id,
@@ -45,8 +44,9 @@ def main(thread_id):
         # file_ids=["file_ckt30hTJn1q2f2j1Nz8Z6y1Y"],
         # user_message="remember x = 56"
         # user_message="what is value of x?"
-        user_message="What are breaking changes in Kubernetes v1.25.0?"
+        # user_message="What are breaking changes in Kubernetes v1.25.0?"
         # user_message="What the latest version of the Kubernetes?"
+        user_message="What should I consider before upgrading from Kubernetes 1.27 to Kubernetes 1.28?"
     )
     # -- Print messages
     display_thread_messages(response)
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # thread = assistant.create_thread()
     # print(thread)
 
-    thread_id = "thread_mSJztCaNdLVr9Svad57mEZFV"
+    thread_id = config.assistant_thread_id  # "thread_mSJztCaNdLVr9Svad57mEZFV"
 
     # -- Delete thread
     # thread = assistant.delete_thread(thread_id)
