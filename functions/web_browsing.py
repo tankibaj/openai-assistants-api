@@ -1,8 +1,8 @@
 import json
 
-from functions.duck_duck_go_search import DuckDuckGoSearchManager
-from functions.google_search import GoogleSearchManager
-from functions.web_scraper import WebContentScraper
+from services.duck_duck_go_search import DuckDuckGoSearchManager
+from services.google_search import GoogleSearchManager
+from services.web_scraper import WebContentScraper
 
 ddg = DuckDuckGoSearchManager()
 gs = GoogleSearchManager()

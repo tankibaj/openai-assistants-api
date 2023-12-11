@@ -1,4 +1,4 @@
-from functions.argocd_controller import ArgoCDController
+from services.argocd_controller import ArgoCDController
 
 
 def get_available_applications() -> dict:
