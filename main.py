@@ -5,7 +5,7 @@ import functions.weather as weather
 import functions.web_browsing as browser
 import functions.kubernetes_changelog as kubernetes_changelog
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging = logging.getLogger(__name__)
 
 system_prompt = """You are an AI assistant with access to websearch and server functions.

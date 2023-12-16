@@ -12,4 +12,4 @@ kubernetes_changelog_db_name = os.getenv("KUBERNETES_CHANGELOG_DB_NAME")
 kubernetes_changelog_db_user = os.getenv("KUBERNETES_CHANGELOG_DB_USER")
 kubernetes_changelog_db_password = os.getenv("KUBERNETES_CHANGELOG_DB_PASSWORD")
 assistant_thread_id = os.getenv("ASSISTANT_THREAD_ID")
-
+history_dir = os.getenv("HISTORY_DIR", "./")
