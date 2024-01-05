@@ -4,6 +4,8 @@ import config
 import functions.weather as weather
 import functions.web_browsing as browser
 import functions.kubernetes_changelog as kubernetes_changelog
+from functions.github_release_notes import get_latest_version
+from functions.github_release_notes import get_release_notes
 
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 logging = logging.getLogger(__name__)
@@ -28,6 +30,8 @@ assistant = AssistantManager(
         weather.get_weather,
         browser.text_search,
         kubernetes_changelog.query_by_version,
+        get_latest_version,
+        get_release_notes
     ]
 )
 
