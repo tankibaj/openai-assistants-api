@@ -1,6 +1,5 @@
-from main import assistant
-from main import system_prompt
-from assistant_cli.assistant import AssistantCLI
+from assistant_initialization import assistant
+from assistant_initialization import system_prompt
 import config
 
 thread_id = config.assistant_thread_id
@@ -16,5 +15,6 @@ def ask_assistant(query=None):
 
 
 if __name__ == "__main__":
-    ai_interface = AssistantCLI(response_handler=ask_assistant)
-    ai_interface.run()
+    query = "What is the cutoff date for your training data, and can you access real-time information?"
+    answer = ask_assistant(query)
+    print(answer)
